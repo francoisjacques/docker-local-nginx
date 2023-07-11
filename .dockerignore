@@ -1,0 +1,15 @@
+# don't care about git history/branches/etc
+.git
+
+# Docker
+.dockerignore
+Dockerfile
+
+# Editors
+.editorconfig
+
+# OS
+.DS_Store/*
+
+# Markdowns
+README.md

@@ -1,0 +1,41 @@
+---
+version: '3.2'
+
+services:
+  http:
+    build: .
+    environment:
+      # https://docs.docker.com/desktop/networking/#i-want-to-connect-from-a-container-to-a-service-on-the-host
+      - TARGET_SERVER=http://host.docker.internal:4000
+      - HOME
+      - USERPROFILE
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - type: volume
+        # https://docs.docker.com/compose/compose-file/12-interpolation/
+        # Use POSIX HOME, and fallback to USERPROFILE for precious Windows.
+        # https://en.wikipedia.org/wiki/Home_directory
+        source: certs
+        target: /usr/local/nginx/conf/
+        read_only: true
+        volume:
+          # https://github.com/compose-spec/compose-spec/blob/master/spec.md#long-syntax-4
+          # disable copying of data from a container when a volume is created
+          nocopy: true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    sysctls:
+      net.ipv4.tcp_mtu_probing: 1
+      net.ipv4.tcp_notsent_lowat: 262144
+      net.ipv4.tcp_slow_start_after_idle: 0
+      net.ipv4.tcp_timestamps: 0
+
+volumes:
+  certs:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${HOME:-${USERPROFILE:-nobody}}/.certs
+      o: bind
